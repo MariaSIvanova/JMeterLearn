@@ -605,9 +605,9 @@ vars.put(&quot;ReturnDate&quot;, &quot;&quot;+retDate.format(&quot;dd/MM/yyyy&qu
               </collectionProp>
             </HeaderManager>
             <hashTree/>
-            <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="true">
+            <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath_forArrivalCity" enabled="true">
               <stringProp name="XPathExtractor.default"></stringProp>
-              <stringProp name="XPathExtractor.refname">arriveVal</stringProp>
+              <stringProp name="XPathExtractor.refname">MyArriveCity</stringProp>
               <stringProp name="XPathExtractor.matchNumber">0</stringProp>
               <stringProp name="XPathExtractor.xpathQuery">//select[@name=&apos;arrive&apos;]/option</stringProp>
               <boolProp name="XPathExtractor.validate">false</boolProp>
@@ -615,77 +615,38 @@ vars.put(&quot;ReturnDate&quot;, &quot;&quot;+retDate.format(&quot;dd/MM/yyyy&qu
               <boolProp name="XPathExtractor.namespace">false</boolProp>
             </XPathExtractor>
             <hashTree/>
-            <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="true">
-              <stringProp name="XPathExtractor.default"></stringProp>
-              <stringProp name="XPathExtractor.refname">departAllVal</stringProp>
-              <stringProp name="XPathExtractor.matchNumber">-1</stringProp>
-              <stringProp name="XPathExtractor.xpathQuery">//select[@name=&apos;depart&apos;]/option</stringProp>
-              <boolProp name="XPathExtractor.validate">false</boolProp>
-              <boolProp name="XPathExtractor.tolerant">true</boolProp>
-              <boolProp name="XPathExtractor.namespace">false</boolProp>
-            </XPathExtractor>
-            <hashTree/>
-            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223_forDepartCity" enabled="true">
               <stringProp name="cacheKey"></stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="script">for (int i=0; i&lt;3; i++){
-	log.info(i.toString())} 
-
+              <stringProp name="script">//ловим входящую xml
 byte [] samplerdata =  prev.getResponseData();
 String samplerdatastring = new String(samplerdata, &quot;UTF-8&quot;);
 log.info(&quot;Response Data : \n _ \n&quot; + samplerdatastring + &quot;\n _&quot;);
-def m = samplerdatastring =~ /&lt;option (.*?)&gt;(.*?)&lt;\/option&gt;/
-//log.info(&quot;hellooo&quot; + m);
-//(0..&lt;m.count).each { print m[it] + &apos;\n&apos; }
 
-def title = m[14][2]
-vars.put(&quot;MyM&quot;,&quot;&quot;+m);
-log.info(&quot;title: &quot; + title)
-//if (title.equals(&quot;Frankfurt&quot;)) {
-//	prev.setSuccessful(false)
-//	prev.setResponseMessage(&quot;Не найден title = &apos;Frankfurt&apos;&quot;)
-//	log.info(&quot;Не найден title = &apos;Frankfurt&apos;&quot;)
-//}</stringProp>
+//создаем массив по регулярному выражению
+def m = samplerdatastring =~ /&lt;option (.*?)&gt;(.*?)&lt;\/option&gt;/
+
+//сохраняем из массива рандомно 1 из 10 городов (в массив попадают все 20 городов)
+//наверное, это не правильно, но не смогла написать регулярку для выбора только из первого элемента городов
+//выбираем 2 группу, т.к. там нет кавычек
+def title = m[${__Random(0,9,)}][2]
+
+//проверяем не совпадают ли названия городов прилета или вылета
+if (title.equals(&quot;${MyArriveCity}&quot;)) {
+	//если совпадают, то выбираем заново
+	while(title.equals(&quot;${MyArriveCity}&quot;)){
+		title = m[${__Random(0,9,)}][2]
+		}
+	}
+vars.put(&quot;MyDepartCity&quot;,&quot;&quot;+title);
+
+def seatType = [&quot;First&quot;, &quot;Business&quot;, &quot;Coach&quot;]</stringProp>
               <stringProp name="scriptLanguage">groovy</stringProp>
             </JSR223PostProcessor>
             <hashTree/>
-            <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="Random Variable" enabled="false">
-              <stringProp name="variableName"></stringProp>
-              <stringProp name="outputFormat"></stringProp>
-              <stringProp name="minimumValue">1</stringProp>
-              <stringProp name="maximumValue"></stringProp>
-              <stringProp name="randomSeed"></stringProp>
-              <boolProp name="perThread">false</boolProp>
-            </RandomVariableConfig>
-            <hashTree/>
           </hashTree>
         </hashTree>
-        <ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="ForEach Controller" enabled="false">
-          <stringProp name="ForeachController.inputVal">departAllVal</stringProp>
-          <stringProp name="ForeachController.returnVal">depp</stringProp>
-          <boolProp name="ForeachController.useSeparator">true</boolProp>
-        </ForeachController>
-        <hashTree>
-          <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="${depp}" enabled="true">
-            <boolProp name="displayJMeterProperties">false</boolProp>
-            <boolProp name="displayJMeterVariables">true</boolProp>
-            <boolProp name="displaySystemProperties">false</boolProp>
-          </DebugSampler>
-          <hashTree/>
-          <RandomOrderController guiclass="RandomOrderControllerGui" testclass="RandomOrderController" testname="Random Order Controller" enabled="false"/>
-          <hashTree/>
-          <RandomController guiclass="RandomControlGui" testclass="RandomController" testname="Random Controller" enabled="false">
-            <intProp name="InterleaveControl.style">1</intProp>
-          </RandomController>
-          <hashTree/>
-        </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If Controller" enabled="false">
-          <stringProp name="IfController.condition">if (${depp} == ${arriveVal}) vars.set(depp,&quot;mama&quot;)
-else log.info(&quot;jojo&quot;)</stringProp>
-          <boolProp name="IfController.evaluateAll">false</boolProp>
-        </IfController>
-        <hashTree/>
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="reservations" enabled="true">
           <boolProp name="TransactionController.includeTimers">false</boolProp>
           <boolProp name="TransactionController.parent">true</boolProp>
@@ -704,7 +665,7 @@ else log.info(&quot;jojo&quot;)</stringProp>
                 <elementProp name="depart" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">true</boolProp>
                   <stringProp name="Argument.name">depart</stringProp>
-                  <stringProp name="Argument.value">San Francisco</stringProp>
+                  <stringProp name="Argument.value">${MyDepartCity}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 </elementProp>
@@ -718,7 +679,7 @@ else log.info(&quot;jojo&quot;)</stringProp>
                 <elementProp name="arrive" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.name">arrive</stringProp>
-                  <stringProp name="Argument.value">${arriveVal}</stringProp>
+                  <stringProp name="Argument.value">${MyArriveCity}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 </elementProp>
@@ -746,7 +707,7 @@ else log.info(&quot;jojo&quot;)</stringProp>
                 <elementProp name="seatType" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                   <stringProp name="Argument.name">seatType</stringProp>
-                  <stringProp name="Argument.value">Coach</stringProp>
+                  <stringProp name="Argument.value">${__RandomFromMultipleVars(seatType)}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 </elementProp>
